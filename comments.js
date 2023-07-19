@@ -33,3 +33,13 @@ app.get('/', (req, res) => {
 server.listen(port, () => {
     console.log(`Server listening on port ${port}`);
 });
+
+// cargar la libreria de socket
+io.on('connection', (socket) => {
+    console.log('New user connected');
+
+    socket.on('newMessage', (message) => {
+        console.log(message);
+        io.emit('newMessage', message);
+    });
+});
