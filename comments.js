@@ -1,19 +1,26 @@
-// crear servidor web
-var express = require('express');
-// cargar el modulo del controlador
-var CommentController = require('../controllers/comment');
-// cargar el router de express
-var api = express.Router();
-// cargar el middleware de autenticacion
-var md_auth = require('../middlewares/authenticated');
-// cargar multiparty
-var multipart = require('connect-multiparty');
-// cargar el middleware de subida de ficheros
-var md_upload = multipart({ uploadDir: './uploads/comments' });
-// crear rutas
-api.post('/comment/topic/:topicId', md_auth.ensureAuth, CommentController.add);
-api.put('/comment/:commentId', md_auth.ensureAuth, CommentController.update);
-api.delete('/comment/:topicId/:commentId', md_auth.ensureAuth, CommentController.delete);
+// Create web server with node.js and express.js
+// Run with: node comments.js
+// Access with: http://localhost:8080/comments
+// Access with: http://localhost:8080/comments/1
+// Access with: http://localhost:8080/comments/2
 
-// exportar el modulo
-module.exports = api;
+var express = require('express');
+var app = express();
+
+var comments = [
+    { name: 'John', comment: 'Hello' },
+    { name: 'Mary', comment: 'Hi' },
+    { name: 'Sue', comment: 'Goodbye' }
+];
+
+app.get('/comments', function(req, res) {
+    res.send(comments);
+});
+
+app.get('/comments/:id', function(req, res) {
+    var id = req.params.id;
+    res.send(comments[id]);
+});
+
+app.listen(8080);
+console.log('Listening on port 8080');
