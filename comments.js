@@ -1,45 +1,26 @@
-// crear servidor web
-const express = require('express');
-const app = express();
-const port = 3000;
+// create web server
+var express = require('express');
+var app = express();
+// create web server
+var server = require('http').createServer(app);
+// create socket server
+var io = require('socket.io')(server);
+// create redis client
+var redis = require('redis');
+var redisClient = redis.createClient();
+// subscribe to channel
+redisClient.subscribe('message');
 
-// crear servidor de socket
-const http = require('http');
-const server = http.createServer(app);
-
-// crear servidor de socket
-const socketIO = require('socket.io');
-const io = socketIO.listen(server);
-
-// crear servidor de socket
-io.on('connection', (socket) => {
-    console.log('New user connected');
-
-    socket.on('newMessage', (message) => {
-        console.log(message);
-        io.emit('newMessage', message);
-    });
+// when redis client receives message
+redisClient.on('message', function(channel, message) {
+  // emit message
+  io.emit(channel, message);
 });
 
-// cargar la libreria de socket
-app.use(express.static(__dirname + '/node_modules/socket.io-client/dist'));
+// serve static files
+app.use(express.static(__dirname + '/public'));
 
-// cargar la libreria de socket
-app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/index.html');
-});
-
-// cargar la libreria de socket
-server.listen(port, () => {
-    console.log(`Server listening on port ${port}`);
-});
-
-// cargar la libreria de socket
-io.on('connection', (socket) => {
-    console.log('New user connected');
-
-    socket.on('newMessage', (message) => {
-        console.log(message);
-        io.emit('newMessage', message);
-    });
+// start server
+server.listen(3000, function() {
+  console.log('Server listening on port 3000');
 });
