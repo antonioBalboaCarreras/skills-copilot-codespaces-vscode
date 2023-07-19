@@ -1,26 +1,19 @@
-// create web server
+// crear servidor web
 var express = require('express');
-var app = express();
-// create web server
-var server = require('http').createServer(app);
-// create socket server
-var io = require('socket.io')(server);
-// create redis client
-var redis = require('redis');
-var redisClient = redis.createClient();
-// subscribe to channel
-redisClient.subscribe('message');
+// cargar el modulo del controlador
+var CommentController = require('../controllers/comment');
+// cargar el router de express
+var api = express.Router();
+// cargar el middleware de autenticacion
+var md_auth = require('../middlewares/authenticated');
+// cargar multiparty
+var multipart = require('connect-multiparty');
+// cargar el middleware de subida de ficheros
+var md_upload = multipart({ uploadDir: './uploads/comments' });
+// crear rutas
+api.post('/comment/topic/:topicId', md_auth.ensureAuth, CommentController.add);
+api.put('/comment/:commentId', md_auth.ensureAuth, CommentController.update);
+api.delete('/comment/:topicId/:commentId', md_auth.ensureAuth, CommentController.delete);
 
-// when redis client receives message
-redisClient.on('message', function(channel, message) {
-  // emit message
-  io.emit(channel, message);
-});
-
-// serve static files
-app.use(express.static(__dirname + '/public'));
-
-// start server
-server.listen(3000, function() {
-  console.log('Server listening on port 3000');
-});
+// exportar el modulo
+module.exports = api;
